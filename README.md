@@ -1,5 +1,7 @@
 # Job Tracker
 
+**Live demo:** https://job-tracker-web-3sac.onrender.com (the free API server sleeps when idle, so the first load can take up to a minute)
+
 A web app for tracking graduate job applications: add each application, update its status as it moves through the process, and see at a glance how many are in progress, at interview, offered or rejected.
 
 ![Job Tracker screenshot](docs/screenshot.png)
@@ -17,7 +19,8 @@ A web app for tracking graduate job applications: add each application, update i
 ## Tech stack
 
 **Frontend:** React (Vite), JavaScript, CSS
-**Backend:** Python, Django, Django REST Framework, SQLite (PostgreSQL planned for deployment)
+**Backend:** Python, Django, Django REST Framework, PostgreSQL (SQLite locally)
+**Deployment:** Render (static site, web service with Gunicorn, managed PostgreSQL) defined in `render.yaml`
 **Testing:** Django REST Framework `APITestCase`
 
 ## Project structure
@@ -79,4 +82,4 @@ python manage.py test
 - [x] React frontend with add, update, delete and filter
 - [x] Django REST API with tests
 - [x] Connect the React app to the API (data saved in the database)
-- [ ] Deploy (frontend on Vercel, API and PostgreSQL database online)
+- [x] Deploy on Render (React static site, Django API, PostgreSQL)
