@@ -28,3 +28,13 @@ services:
         value: .onrender.com
       - key: CORS_ALLOWED_ORIGINS
         sync: false
+
+  # React frontend, served as a static site.
+  - type: web
+    name: job-tracker-web
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://job-tracker-api-tcva.onrender.com/api
