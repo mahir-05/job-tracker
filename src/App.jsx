@@ -1,57 +1,66 @@
 import './App.css'
 import ApplicationCard from './ApplicationCard'
 import { useState, useEffect } from 'react'
+import * as api from './api'
 
 const STATUSES = ['Applied', 'Pending', 'Test Submitted', 'Interview', 'Offer', 'Rejected']
 
-const STARTING_APPLICATIONS = [
-  { id: 1, company: 'Sky', role: 'Emerging Tech Graduate Scheme', status: 'Pending' },
-  { id: 2, company: 'TFL', role: 'Power Platform Graduate Scheme', status: 'Pending' },
-  { id: 3, company: 'Wise', role: 'WiseStart Engineering', status: 'Test Submitted' }
-]
-
 function App() {
-  const [applications, setApplications] = useState(() => {
-    const saved = localStorage.getItem('applications')
-    return saved ? JSON.parse(saved) : STARTING_APPLICATIONS
-  })
+  const [applications, setApplications] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [company, setCompany] = useState('')
   const [role, setRole] = useState('')
   const [status, setStatus] = useState('Applied')
   const [filter, setFilter] = useState('All')
 
+  // Load applications from the API once, when the page first opens.
   useEffect(() => {
-    localStorage.setItem('applications', JSON.stringify(applications))
-  }, [applications])
+    api
+      .getApplications()
+      .then((data) => setApplications(data))
+      .catch(() => setError('Could not load applications. Is the Django server running?'))
+      .finally(() => setLoading(false))
+  }, [])
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     if (!company.trim() || !role.trim()) return
 
-    const newApplication = {
-      id: Date.now(),
-      company: company.trim(),
-      role: role.trim(),
-      status: status,
-      dateAdded: new Date().toISOString()
+    try {
+      const saved = await api.createApplication({
+        company: company.trim(),
+        role: role.trim(),
+        status: status
+      })
+      setApplications([...applications, saved])
+      setCompany('')
+      setRole('')
+      setStatus('Applied')
+      setError('')
+    } catch {
+      setError('Could not add the application. Please try again.')
     }
-
-    setApplications([...applications, newApplication])
-    setCompany('')
-    setRole('')
-    setStatus('Applied')
   }
 
-  function updateStatus(id, newStatus) {
-    setApplications(
-      applications.map((app) =>
-        app.id === id ? { ...app, status: newStatus } : app
-      )
-    )
+  async function updateStatus(id, newStatus) {
+    try {
+      const updated = await api.updateApplication(id, { status: newStatus })
+      setApplications(applications.map((app) => (app.id === id ? updated : app)))
+      setError('')
+    } catch {
+      setError('Could not update the status. Please try again.')
+    }
   }
 
-  function deleteApplication(id) {
-    setApplications(applications.filter((app) => app.id !== id))
+  async function deleteApplication(id) {
+    try {
+      await api.deleteApplication(id)
+      setApplications(applications.filter((app) => app.id !== id))
+      setError('')
+    } catch {
+      setError('Could not delete the application. Please try again.')
+    }
   }
 
   function countWithStatus(statusList) {
@@ -88,6 +97,8 @@ function App() {
           <h1>Applications</h1>
           <p className="subtitle">Track every application and see where each one stands.</p>
         </header>
+
+        {error && <div className="error-banner">{error}</div>}
 
         <section className="stats">
           {stats.map((s) => (
@@ -150,7 +161,9 @@ function App() {
             </select>
           </div>
 
-          {visibleApplications.length === 0 ? (
+          {loading ? (
+            <p className="empty">Loading applications...</p>
+          ) : visibleApplications.length === 0 ? (
             <p className="empty">
               {applications.length === 0
                 ? 'No applications yet. Add your first one above.'

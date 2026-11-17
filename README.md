@@ -11,6 +11,7 @@ A web app for tracking graduate job applications: add each application, update i
 - Delete applications
 - Summary counts for each stage
 - Filter the list by status
+- Data stored in a database through a Django REST API
 - Responsive layout that works on phones
 
 ## Tech stack
@@ -77,5 +78,5 @@ python manage.py test
 
 - [x] React frontend with add, update, delete and filter
 - [x] Django REST API with tests
-- [ ] Connect the React app to the API (currently saves to the browser with localStorage)
+- [x] Connect the React app to the API (data saved in the database)
 - [ ] Deploy (frontend on Vercel, API and PostgreSQL database online)

@@ -70,3 +70,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = os.environ.get(
     'CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173'
 ).split(',')
+
+# In local development, allow the React dev server on any localhost port (5173, 5174, ...).
+if DEBUG:
+    CORS_ALLOWED_ORIGIN_REGEXES = [r'^http://(localhost|127\.0\.0\.1):\d+$']
